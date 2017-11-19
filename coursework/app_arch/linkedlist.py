@@ -5,7 +5,7 @@ class Node(object):
 
     def __init__(self, data):
         self.data = data
-        self.next_node = None
+        self.next = None
 
     def __repr__(self):
         """Return a string representation of this node."""
@@ -20,7 +20,7 @@ class LinkedList(object):
     '''
 
     def __init__(self, items):
-        self.head = Node() #First Node
+        self.head = None #First Node
         self.tail = None #Last Node
 
         if items is not None:
@@ -47,7 +47,7 @@ class LinkedList(object):
         while node is not None:  # Always n iterations because no early return
             items.append(node.data)  # O(1) time (on average) to append to list
             # Skip to next node to advance forward in linked list
-            node = node.next_node  # O(1) time to reassign variable
+            node = node.next  # O(1) time to reassign variable
         # Now list contains items from all nodes
         return items  # O(1) time to return list
 
@@ -58,26 +58,39 @@ class LinkedList(object):
         new_node = Node(item)
         current = self.head
         # Traverse through the list until the last node
-        while current.next_node != None:
-            current = current.next_node
+        while current.next != None:
+            current = current.next
 
-        current.next_node = new_node
+        current.next = new_node
         return new_node
 
 
-    def prepend(self, data):
+    def prepend(self, item):
         '''
         Prepend a new item before its head node
         '''
-        new_node = Node(data)
-        previous_node = self.head
+        new_node = Node(item)
+
+        if self.is_empty():
+            self.head = new_node
+            self.tail = self.head
+        else:
+            #new node should point to the old node(head)
+            #head should be the new node
+            new_node.next = self.head
+            self.head = new_node
 
 
-    def find(self):
+    def find(self, quality):
         '''
         Find an item using a matching function
         '''
-        pass
+        node = self.head
+
+        while node != None:
+            if quality(node.data):
+                return node.data
+            node = node.next
 
     def replace(self):
         '''
@@ -86,7 +99,27 @@ class LinkedList(object):
         pass
 
     def delete(self, item):
+        """Delete the given item from this linked list, or raise ValueError."""
+        current = self.head
+        previous = None
 
+        while current is not None:
+            if current.data == item:
+                if current is not self.head and current is not self.tail:
+                    previous.next = current.next
+                    current.next = None
+                if current is self.head:
+                    self.head = current.next
+                    current.next = None
+                if current is self.tail:
+                    if previous is not None:
+                        previous.next = None
+                    self.tail = previous
+                return current
+            # Update previous node to skip around node with matching data
+            previous = current
+            current = current.next
+        raise ValueError('Item not found: {}'.format(item))
 
     def is_empty(self):
         """Return a boolean indicating whether this linked list is empty."""
@@ -104,3 +137,36 @@ class LinkedList(object):
             length += 0
             current = current.next_node
         return length
+
+
+
+def test_linked_list():
+    ll = LinkedList()
+    print('list: {}'.format(ll))
+
+    print('\nTesting append:')
+    for item in ['A', 'B', 'C']:
+        print('append({!r})'.format(item))
+        ll.append(item)
+        print('list: {}'.format(ll))
+
+    print('head: {}'.format(ll.head))
+    print('tail: {}'.format(ll.tail))
+    print('length: {}'.format(ll.length()))
+
+    # Enable this after implementing delete method
+    delete_implemented = False
+    if delete_implemented:
+        print('\nTesting delete:')
+        for item in ['B', 'C', 'A']:
+            print('delete({!r})'.format(item))
+            ll.delete(item)
+            print('list: {}'.format(ll))
+
+        print('head: {}'.format(ll.head))
+        print('tail: {}'.format(ll.tail))
+        print('length: {}'.format(ll.length()))
+
+
+if __name__ == '__main__':
+    test_linked_list()
